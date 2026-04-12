@@ -1,50 +1,36 @@
 package policy
 
 import (
-	"encoding/json"
 	"fmt"
 	"os"
-	"time"
+
+	"gopkg.in/yaml.v3"
 )
 
-// rawPolicy is used for JSON unmarshalling with string-based duration.
-type rawPolicy struct {
-	Name     string `json:"name"`
-	Endpoint string `json:"endpoint"`
-	Method   string `json:"method"`
-	Limit    int    `json:"limit"`
-	Window   string `json:"window"`
+// policyFile represents the top-level structure of a policy YAML file.
+type policyFile struct {
+	Policies []Policy `yaml:"policies"`
 }
 
-// LoadFromFile reads and parses a JSON policy file, returning validated policies.
-func LoadFromFile(path string) ([]*Policy, error) {
+// LoadFromFile reads a YAML file at the given path and returns a slice of
+// validated Policy values. An error is returned if the file cannot be read,
+// parsed, or if any policy fails validation.
+func LoadFromFile(path string) ([]Policy, error) {
 	data, err := os.ReadFile(path)
 	if err != nil {
-		return nil, fmt.Errorf("reading policy file: %w", err)
+		return nil, fmt.Errorf("reading policy file %q: %w", path, err)
 	}
 
-	var raws []rawPolicy
-	if err := json.Unmarshal(data, &raws); err != nil {
-		return nil, fmt.Errorf("parsing policy file: %w", err)
+	var pf policyFile
+	if err := yaml.Unmarshal(data, &pf); err != nil {
+		return nil, fmt.Errorf("parsing policy file %q: %w", path, err)
 	}
 
-	policies := make([]*Policy, 0, len(raws))
-	for i, r := range raws {
-		window, err := time.ParseDuration(r.Window)
-		if err != nil {
-			return nil, fmt.Errorf("policy[%d] invalid window %q: %w", i, r.Window, err)
+	for i := range pf.Policies {
+		if err := Validate(&pf.Policies[i]); err != nil {
+			return nil, fmt.Errorf("policy %d in %q: %w", i, path, err)
 		}
-		p := &Policy{
-			Name:     r.Name,
-			Endpoint: r.Endpoint,
-			Method:   r.Method,
-			Limit:    r.Limit,
-			Window:   window,
-		}
-		if err := p.Validate(); err != nil {
-			return nil, fmt.Errorf("policy[%d] validation failed: %w", i, err)
-		}
-		policies = append(policies, p)
 	}
-	return policies, nil
+
+	return pf.Policies, nil
 }
