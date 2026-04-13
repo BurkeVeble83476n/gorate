@@ -2,45 +2,37 @@ package cli
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/spf13/cobra"
-
-	"gorate/internal/policy"
+	"github.com/user/gorate/internal/policy"
 )
 
+// NewInspectCmd returns a cobra command that loads and displays rate-limit policies.
 func NewInspectCmd() *cobra.Command {
-	var policiesFile string
+	var file string
 
 	cmd := &cobra.Command{
 		Use:   "inspect",
-		Short: "Inspect and display loaded rate-limit policies",
+		Short: "Inspect rate-limit policies from a configuration file",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			policies, err := policy.LoadFromFile(policiesFile)
+			policies, err := policy.LoadFromFile(file)
 			if err != nil {
-				return fmt.Errorf("loading policies: %w", err)
+				return fmt.Errorf("failed to load policies: %w", err)
 			}
 
 			if len(policies) == 0 {
-				fmt.Println("No policies found.")
+				fmt.Fprintln(cmd.OutOrStdout(), "No policies defined.")
 				return nil
 			}
 
-			fmt.Printf("%-20s %-30s %-10s %-10s %s\n", "NAME", "ENDPOINT", "METHOD", "LIMIT", "WINDOW")
-			fmt.Println("--------------------------------------------------------------------------------")
-			for _, p := range policies {
-				fmt.Printf("%-20s %-30s %-10s %-10d %s\n",
-					p.Name,
-					p.Endpoint,
-					p.Method,
-					p.Limit,
-					p.Window,
-				)
-			}
+			policy.PrintTable(cmd.OutOrStdout(), policies)
 			return nil
 		},
 	}
 
-	cmd.Flags().StringVarP(&policiesFile, "policies", "p", "policies.yaml", "Path to policies YAML file")
+	cmd.Flags().StringVarP(&file, "file", "f", "policies.yaml", "Path to the policies YAML file")
 
+	_ = os.Stderr // ensure os import used
 	return cmd
 }
