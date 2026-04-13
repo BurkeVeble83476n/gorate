@@ -71,6 +71,15 @@ func TestSnapshot_IsACopy(t *testing.T) {
 	}
 }
 
+func TestSnapshot_EmptyStats(t *testing.T) {
+	s := NewRequestStats()
+
+	snap := s.Snapshot()
+	if len(snap) != 0 {
+		t.Errorf("expected empty snapshot, got %d entries", len(snap))
+	}
+}
+
 func TestPrintStats_DoesNotPanic(t *testing.T) {
 	s := NewRequestStats()
 	s.Record("demo", true)
