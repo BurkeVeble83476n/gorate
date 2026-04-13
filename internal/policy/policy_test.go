@@ -68,3 +68,12 @@ func TestRatePerSecond(t *testing.T) {
 		t.Errorf("expected 1.0 req/s, got: %f", got)
 	}
 }
+
+func TestRatePerSecond_SubSecondWindow(t *testing.T) {
+	p := &Policy{Limit: 10, Window: time.Millisecond * 500}
+	got := p.RatePerSecond()
+	// 10 requests per 0.5s = 20 req/s
+	if got != 20.0 {
+		t.Errorf("expected 20.0 req/s, got: %f", got)
+	}
+}
