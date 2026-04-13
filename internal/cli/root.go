@@ -1,18 +1,27 @@
 package cli
 
-import (
-	"github.com/spf13/cobra"
-)
+import "github.com/spf13/cobra"
 
-func NewRootCmd(version string) *cobra.Command {
-	cmd := &cobra.Command{
-		Use:     "gorate",
-		Short:   "A lightweight CLI tool for rate-limiting HTTP endpoints during local development",
-		Version: version,
+// NewRootCmd builds and returns the root cobra command with all sub-commands
+// registered.
+func NewRootCmd() *cobra.Command {
+	root := &cobra.Command{
+		Use:   "gorate",
+		Short: "Apply and inspect rate-limit policies on HTTP endpoints",
+		SilenceUsage:  true,
+		SilenceErrors: true,
 	}
 
-	cmd.AddCommand(NewRunCmd())
-	cmd.AddCommand(NewInspectCmd())
+	root.AddCommand(NewRunCmd())
+	root.AddCommand(NewInspectCmd())
+	root.AddCommand(NewValidateCmd())
+	root.AddCommand(NewStatsCmd())
+	root.AddCommand(NewExportCmd())
+	root.AddCommand(NewTagCmd())
+	root.AddCommand(NewDedupCmd())
+	root.AddCommand(NewMergeCmd())
+	root.AddCommand(NewRenameCmd())
+	root.AddCommand(NewCloneCmd())
 
-	return cmd
+	return root
 }
