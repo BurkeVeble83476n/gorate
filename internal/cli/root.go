@@ -1,13 +1,17 @@
 package cli
 
-import "github.com/spf13/cobra"
+import (
+	"github.com/spf13/cobra"
+)
 
-// NewRootCmd builds and returns the root cobra command with all sub-commands
-// registered.
+// NewRootCmd creates the root cobra command for gorate.
 func NewRootCmd() *cobra.Command {
 	root := &cobra.Command{
 		Use:   "gorate",
-		Short: "Apply and inspect rate-limit policies on HTTP endpoints",
+		Short: "A lightweight CLI tool for applying and inspecting rate-limit policies",
+		Long: `gorate helps you apply, inspect, and manage HTTP rate-limit policies
+during local development. Use subcommands to run a proxy, inspect policies,
+validate configuration, export, diff, merge, and more.`,
 		SilenceUsage:  true,
 		SilenceErrors: true,
 	}
@@ -22,6 +26,9 @@ func NewRootCmd() *cobra.Command {
 	root.AddCommand(NewMergeCmd())
 	root.AddCommand(NewRenameCmd())
 	root.AddCommand(NewCloneCmd())
+	root.AddCommand(NewPatchCmd())
+	root.AddCommand(NewDiffCmd())
+	root.AddCommand(NewSnapshotCmd())
 
 	return root
 }
