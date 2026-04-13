@@ -66,6 +66,8 @@ func NewTemplateCmd() *cobra.Command {
 	return cmd
 }
 
+// parseVarFlags converts a slice of "KEY=VALUE" strings into a map.
+// Entries that do not contain "=" are silently ignored.
 func parseVarFlags(raw []string) map[string]string {
 	vars := make(map[string]string)
 	for _, entry := range raw {
@@ -77,6 +79,8 @@ func parseVarFlags(raw []string) map[string]string {
 	return vars
 }
 
+// printTemplateResult encodes the resolved policy to stdout in the requested
+// format. Supported formats are "yaml" (default) and "json".
 func printTemplateResult(p policy.Policy, format string) error {
 	switch strings.ToLower(format) {
 	case "json":
@@ -84,7 +88,9 @@ func printTemplateResult(p policy.Policy, format string) error {
 		enc.SetIndent("", "  ")
 		return enc.Encode(p)
 	case "yaml":
-		return yaml.NewEncoder(os.Stdout).Encode(p)
+		enc := yaml.NewEncoder(os.Stdout)
+		enc.SetIndent(2)
+		return enc.Encode(p)
 	default:
 		return fmt.Errorf("unsupported format %q: use yaml or json", format)
 	}
