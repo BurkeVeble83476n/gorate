@@ -4,13 +4,14 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// NewRootCmd constructs the root cobra command for gorate.
+// NewRootCmd builds and returns the root cobra command for gorate.
 func NewRootCmd() *cobra.Command {
 	root := &cobra.Command{
 		Use:   "gorate",
-		Short: "A lightweight CLI tool for applying and inspecting rate-limit policies",
-		Long: `gorate helps you apply, inspect, and manage rate-limit policies
-for HTTP endpoints during local development.`,
+		Short: "A lightweight CLI tool for rate-limit policy management",
+		Long: `gorate helps you apply, inspect, and manage HTTP rate-limit policies
+during local development. Use subcommands to load, validate, export, and
+manipulate policy files.`,
 	}
 
 	root.AddCommand(NewRunCmd())
@@ -33,13 +34,17 @@ for HTTP endpoints during local development.`,
 	root.AddCommand(NewScoreCmd())
 	root.AddCommand(NewProfileCmd())
 	root.AddCommand(NewAnnotateCmd())
-	root.AddCommand(NewArchiveCmd())
-	root.AddCommand(NewPinCmd())
-	root.AddCommand(NewAuditCmd())
 	root.AddCommand(NewLabelCmd())
 	root.AddCommand(NewTransformCmd())
 	root.AddCommand(NewWatchdogCmd())
 	root.AddCommand(NewDependencyCmd())
+	root.AddCommand(NewInheritCmd())
+	root.AddCommand(NewVisibilityCmd())
+	root.AddCommand(NewExpiryCmd())
+	root.AddCommand(NewArchiveCmd())
+	root.AddCommand(NewPinCmd())
+	root.AddCommand(NewAuditCmd())
+	root.AddCommand(NewDeprecateCmd())
 
 	return root
 }
